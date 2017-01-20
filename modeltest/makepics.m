@@ -6,7 +6,7 @@ NBDOUB=0;
 NBQUAD=0;
 NBQUADSIZE=0;
 NBCONT=0;
-NBARRAY=0;
+NBARRAY=40;
 STIMSIZE = 124;  
 MARGIN = 60; %40;
 CLUTSTIMSIZEBIG = 220; % Stimuli are larger for cluttered background images
@@ -24,14 +24,14 @@ EXTENSION = 'ot';
 
 zz = dir([imagedatadir '*.mat']);
 list = {zz.name};
-zz = dir([natdir '*.mat']);
+zz = dir([natdir '*.pgm']);
 listnat = {zz.name};
 
 %list(1:10) = [];
 
-fid = fopen([natdir 'list.txt']);
-listnat = textscan(fid, '%s');
-fclose(fid);
+%fid = fopen([natdir 'list.txt']);
+%listnat = textscan(fid, '%s');
+%fclose(fid);
 
 if NBUNPRED > 0
 	funpredid= fopen([odir 'unpredpos.txt'], 'w');
@@ -57,38 +57,38 @@ row=[];
 nbims = 0; totalims=0;
 pics={}; pic=[];
 
-if MAKENATIMAGES
-	for i=1:numel(listnat{1})
-
-		disp(['Natural image ' num2str(i)]);
-		fname=listnat{1}{i};
-		background=imread(fname);
-		if ((size(background, 1) ~= CSIZE) || (size(background, 1) ~= CSIZE)) error('Wrong image size!'); end; %Checks if 'natural images' used for background have the right size
-		
-
-		% Contrast maximization
-		z = double(background);
-		z = z-min(z(:)); z = z ./ max(z(:));
-		background=z;
-
-		
-		fname=[odir 'nat' num2str(i) '.png'];	
-		canvas = background;
-		imwrite(canvas, fname); 
-		%imwrite(medfilt2(canvas), fname);     % MEDIAN FILTERING !!!!!
-
-		t=imread(fname);
-		fid = fopen([fname '.raw'], 'w');
-		fwrite(fid, t');
-		fclose(fid);
-
-	end;
-end;
+%if MAKENATIMAGES
+%	for i=1:numel(listnat)
+%
+%		disp(['Natural image ' num2str(i)]);
+%		fname=listnat{i};
+%		background=imread(fname);
+%		if ((size(background, 1) ~= CSIZE) || (size(background, 1) ~= CSIZE)) error('Wrong image size!'); end; %Checks if 'natural images' used for background have the right size
+%		
+%
+%		% Contrast maximization
+%		z = double(background);
+%		z = z-min(z(:)); z = z ./ max(z(:));
+%		background=z;
+%
+%		
+%		fname=[odir 'nat' num2str(i) '.png'];	
+%		canvas = background;
+%		imwrite(canvas, fname); 
+%		%imwrite(medfilt2(canvas), fname);     % MEDIAN FILTERING !!!!!
+%
+%		t=imread(fname);
+%		fid = fopen([fname '.raw'], 'w');
+%		fwrite(fid, t');
+%		fclose(fid);
+%
+%	end;
+%end;
 
 
 for i=1:NBOBJS
 %for i=1:numel(list)
-    fname = list{i};
+    fname = [imagedatadir list{i}];
 	disp(fname);
 	z=load(fname); 
 	z = z.image;
@@ -125,7 +125,7 @@ for i=1:NBOBJS
 	for j=1:NBCLUT
 
 		%Checks if 'natural images' used for background have the right size
-		fname=listnat{1}{ceil(rand() * numel(listnat{1}))};
+		fname = [natdir listnat{ceil(rand() * numel(listnat))}];
 		background=imread(fname);
 		if ((size(background, 1) ~= CSIZE) || (size(background, 1) ~= CSIZE)) error('Wrong image size!'); end;
 
@@ -156,8 +156,8 @@ for i=1:NBOBJS
 	fposid = fopen([odir 'unpredpos.txt'], 'a');
 	for j=1:NBUNPRED
 
-		%fname=listnat{1}{ceil(rand() * numel(listnat{1}))};
-		fname=listnat{1}{ceil(rand() * 250)}; % Using only half of all natural images, so other half can be used for training on backgrounds alone
+		%fname=listnat{ceil(rand() * numel(listnat))};
+		fname=[natdir listnat{ceil(rand() * 250)}]; % Using only half of all natural images, so other half can be used for training on backgrounds alone
 		background=imread(fname);
 		%Checks if 'natural images' used for background have the right size
 		if ((size(background, 1) ~= CSIZE) || (size(background, 1) ~= CSIZE)) error('Wrong image size!'); end;
@@ -203,7 +203,7 @@ for i=1:NBOBJS
 
 		% Pick a random other object
 		%fname = list{ceil(rand() * NBOBJS)};
-		fname = list{j};
+		fname = [imagedatadir list{j}];
 		z=load(fname); 
 		z = z.image;
 		maxz = max(abs(z(:)));
@@ -240,7 +240,7 @@ for i=1:NBOBJS
 				othero = ceil(rand() * NBOBJS);
 				%othero = ceil(NBOBJS+rand() * NBOBJS);
 			end;
-			fname = list{othero};  
+			fname = [imagedatadir list{othero}];  
 			z=load(fname); 
 			z = z.image;
 			maxz = max(abs(z(:)));
@@ -293,7 +293,7 @@ canvas(1+(posl-1)*(RSIZE+2*INSMARG)+INSMARG:posl*(RSIZE+2*INSMARG)-INSMARG,1+(po
 				othero = ceil(rand() * NBOBJS);
 				%othero = ceil(NBOBJS+rand() * NBOBJS);
 			end;
-			fname = list{othero};
+			fname = [imagedatadir list{othero}];
 			z=load(fname); 
 			z = z.image;
 			maxz = max(abs(z(:)));
@@ -353,7 +353,7 @@ canvas(1+(posl-1)*(RSIZE+2*INSMARG)+INSMARG:posl*(RSIZE+2*INSMARG)-INSMARG,1+(po
 				othero = ceil(rand() * NBOBJS);
 				%othero = ceil(NBOBJS+rand() * NBOBJS);
 			end;
-			fname = list{othero};
+			fname = [imagedatadir list{othero}];
 			z=load(fname); 
 			z = z.image;
 			maxz = max(abs(z(:)));
@@ -406,7 +406,7 @@ canvas(1+(posl-1)*(RSIZE+2*INSMARG)+INSMARG:posl*(RSIZE+2*INSMARG)-INSMARG,1+(po
 		otherstimlc={};
 		% Pick 4 random other objects - one of which will be obluiterated by the current object
 		for numo=1:4
-			fname = list{ceil(rand() * NBOBJS)};
+			fname = [imagedatadir list{ceil(rand() * NBOBJS)}];
 			z=load(fname); 
 			z = z.image;
 			maxz = max(abs(z(:)));

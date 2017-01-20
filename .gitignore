@@ -1,2 +1,4 @@
-modelest/images/*
+modeltest/images/*
 modeltest/out/*
+modeltest/v1_*.txt
+

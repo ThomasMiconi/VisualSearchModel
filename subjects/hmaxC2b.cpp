@@ -3,7 +3,6 @@
 #include "string.h"
 
 
-// Run the system, using the prototypes stored in s2prots.dat and s3prots.dat.
 
 
 int main(int argc, char *argv[])
@@ -68,7 +67,7 @@ int main(int argc, char *argv[])
 	//loadpic("/home/thomas/images/hungetal2005/cph00003.mat.raw");  
 
 	//readProts("protsSort.dat");
-	readProts("prots.dat");
+	readProts("../prots.dat");
 
 	
 	buildNetwork();
@@ -121,6 +120,7 @@ int main(int argc, char *argv[])
 		// The saveC2 function actually calculates the C2 outputs
 		//sprintf(fn, "./out/C2out_%s_%s.out", "ndp", rindex(filenames[numpic],'/')+1); saveC2(fn);
 		sprintf(fn, "./out/C2bout_%s_%s.out", "ndp", rindex(filenames[numpic],'/')+1); saveC2b(fn);
+//		sprintf(fn, "./out/C2bout_%s_%s.out", "ndp", rindex(filenames[numpic],'/')+1); saveC2bMean(fn);
 //		sprintf(fn, "./out/S2bout_%s_%s.out", "ndp", rindex(filenames[numpic],'/')+1); saveS2b(fn);
 		sprintf(fn, "./out/S2bout_%s_%s.out.short", "ndp", rindex(filenames[numpic],'/')+1); saveS2bShort(fn);
 	clock_t TimeEnd= clock();

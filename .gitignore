@@ -1,4 +1,8 @@
 modeltest/images/*
 modeltest/out/*
 modeltest/v1_*.txt
+modeltest/outputl*.txt
+
+subjects1
+subjects2
 

@@ -1,7 +1,14 @@
-modeltest/images/*
-modeltest/out/*
+modeltest/images/*png*
+modeltest/images/*.txt
+modeltest/out/*out*
 modeltest/v1_*.txt
 modeltest/outputl*.txt
+
+subjects/images/*png*
+subjects/images/*.txt
+subjects/out/*out*
+subjects/v1_*.txt
+subjects/outputl*.txt
 
 subjects1
 subjects2

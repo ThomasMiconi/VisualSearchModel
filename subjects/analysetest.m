@@ -36,11 +36,10 @@ load('modelout.mat'); % Standard
 %rndres = load('modeloutCdiam9size44_1200_20s_Rand.mat'); % Standard
 %salres = load('modeloutCdiam9size44_1200_20s_Sal.mat'); % Standard
 
-rndres = load('modelout.mat'); % Standard
-salres = load('modelout.mat'); % Standard
 
-
-EXCLUDE1234 = 1;
+EXCLUDE1234 = 1;   % This excludes the first 4 subjects (Andrew, Alissa/Alyssa, Jess and Khadijah).
+% The reason for this exclusion is that these subjects saw a buggy version of the code, in which the target-absent trials almost always had objects 1 and 2 (the top-hat and accordion) as a target.
+% Note that we still need to include the data in the array for alignment purposes with model output. We just don't use it in the actual analysis.
 
 
 %load('modeloutCdiam7size44.mat');
@@ -122,9 +121,10 @@ z=load([datadir '/ResultsSaccades_Wendy_blk10.mat']);
 
 
 % This one is a bit more complicated because some of the subjects did not come
-% back for the second block, or the second block is incomplete (Jess) . What we
-% do: we include their first block in
-% results2rep, and then we will filter these out in select2rep
+% back for the second block, or the second block is incomplete (Jess). Yet we
+% need data from these blocks to align the array with the model-output data.
+% What we do: we include their first block in results2rep, and then we will
+% filter these out when we build select2rep
 
 z=load([datadir '/ResultsSaccades_Jess_blk1.mat']);  % TO REMOVE IN SELECT2REP   !!!!!!!!!!
 [x i]=sort(z.sequence); results2rep=[results2rep z.results(i)]; subjs2rep=[subjs2rep ones(1,numel(z.results))*11];
@@ -160,6 +160,11 @@ z=load([datadir '/ResultsSaccades_Wendy_blk10.mat']); % TO REMOVE IN SELECT2REP 
 %fixorder=[fixorder(1:370,:); fixorder(440:810,:); fixorder(880:end,:)];
 %arraysmodel=[arraysmodel(1:370,:); arraysmodel(440:810,:); arraysmodel(880:end,:)];
 
+
+% We build the arrays that include relevant values (presented objects, targets, etc.)
+% for each series of block presentations. Each block
+% was shown at least twice to 2 different subjects (arrays1 and arrays2), and in addition, some
+% subjects came back for a second session in which they saw the same block (arrays1rep and arrays2rep). 
 
 arrays1=[]; for i=1:length(results1);  arrays1=[arrays1; results1{i}.probes];  end
 isobjinarray1=[]; for n=1:NBOBJS; isobjinarray1 = [isobjinarray1 sum((arrays1==n)')']; end;
@@ -199,11 +204,11 @@ fixedobjs2rep=-1*ones(numel(results2rep), 6); for i=1:length(results2rep);  uf=f
 fixedobjsmod=-1*ones(size(fixorder)); for i=1:size(fixorder,1); uf=fixorder(i,:); for j=1:numel(uf); if uf(j)==-1 continue; end; fixedobjsmod(i,j) = arraysmodel(i, uf(j)); end; end;
 fmod = fixedobjsmod(:,1);
 
-fixedobjssal=-1*ones(size(salres.fixorder)); for i=1:size(salres.fixorder,1); uf=salres.fixorder(i,:); for j=1:numel(uf); if uf(j)==-1 continue; end; fixedobjssal(i,j) = salres.arraysmodel(i, uf(j)); end; end;
-fsal = fixedobjssal(:,1);
+%fixedobjssal=-1*ones(size(salres.fixorder)); for i=1:size(salres.fixorder,1); uf=salres.fixorder(i,:); for j=1:numel(uf); if uf(j)==-1 continue; end; fixedobjssal(i,j) = salres.arraysmodel(i, uf(j)); end; end;
+%fsal = fixedobjssal(:,1);
 
-fixedobjsrnd=-1*ones(size(rndres.fixorder)); for i=1:size(rndres.fixorder,1); uf=rndres.fixorder(i,:); for j=1:numel(uf); if uf(j)==-1 continue; end; fixedobjsrnd(i,j) = rndres.arraysmodel(i, uf(j)); end; end;
-frnd = fixedobjsrnd(:,1);
+%fixedobjsrnd=-1*ones(size(rndres.fixorder)); for i=1:size(rndres.fixorder,1); uf=rndres.fixorder(i,:); for j=1:numel(uf); if uf(j)==-1 continue; end; fixedobjsrnd(i,j) = rndres.arraysmodel(i, uf(j)); end; end;
+%frnd = fixedobjsrnd(:,1);
 
 %frnds=[];
 %for n=1:1000
@@ -214,7 +219,13 @@ frnd = fixedobjsrnd(:,1);
 %end;
 
 
+
 allowrep2 = subjs2rep ~= 11 & subjs2rep ~= 12 & subjs2rep ~= 18 & subjs2rep ~= 19 & subjs2rep ~= 20; % Exclude those that didn't take the repetition block
+
+
+
+% "m" is the main array, collating all the relevant values from both subjects and model.
+
 
 m=[tgt1' tgtpos1' fixedobjs1(:,1) fixedobjsmod(:,1)  subjs1'; tgt1rep' tgtpos1rep' fixedobjs1rep(:,1) fixedobjsmod(:,1)   subjs1rep'; tgt2' tgtpos2' fixedobjs2(:,1) fixedobjsmod(:,1)  subjs2'; tgt2rep(allowrep2)' tgtpos2rep(allowrep2)' fixedobjs2rep(allowrep2,1) fixedobjsmod(allowrep2,1)  subjs2rep(allowrep2)'];
 mallmodobjs=[tgt1' tgtpos1' fixedobjs1(:,1) fixedobjsmod(:,:)  subjs1'; tgt1rep' tgtpos1rep' fixedobjs1rep(:,1) fixedobjsmod(:,:)   subjs1rep'; tgt2' tgtpos2' fixedobjs2(:,1) fixedobjsmod(:,:)  subjs2'; tgt2rep(allowrep2)' tgtpos2rep(allowrep2)' fixedobjs2rep(allowrep2,1) fixedobjsmod(allowrep2,:)  subjs2rep(allowrep2)'];
@@ -271,26 +282,27 @@ cumperfperobjr=[]; cumperfperobjsal=[];
 for tgobj=1:NBOBJS
 	so=[fixedobjs1(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjs2(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjs1rep(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjs2rep(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
 	mo=[fixedobjsmod(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjsmod(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjsmod(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjsmod(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
-	ro=[fixedobjsrnd(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjsrnd(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjsrnd(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjsrnd(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
-	salo=[fixedobjssal(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjssal(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjssal(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjssal(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
+%	ro=[fixedobjsrnd(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjsrnd(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjsrnd(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjsrnd(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
+%	salo=[fixedobjssal(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1, :); fixedobjssal(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1,:);fixedobjssal(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1, :); fixedobjssal(allowrep2' & tgt2rep'==tgobj & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1,:); ];
 	tgts=[tgt1(tgt1'==tgobj & tgtpos1'~=-10 & fixedobjs1(:,1) ~= -1) tgt2(tgt2'==tgobj & tgtpos2'~=-10 & fixedobjs2(:,1) ~= -1) tgt1rep(tgt1rep'==tgobj & tgtpos1rep'~=-10 & fixedobjs1rep(:,1) ~= -1) tgt2rep(tgt2rep'==tgobj & allowrep2' & tgtpos2rep'~=-10 & fixedobjs2rep(:,1) ~= -1) ];
 	% Now for eqch column of the fixqted-objects array, we count the mean of match between this object and the actual target, and perform the cumulative sum of the resulting means (6, 1 per possible fixation).
 	%disp(cumsum(mean(so==repmat(tgts',1,6))));
 	%disp(cumsum(mean(mo==repmat(tgts',1,6))));
 	cumperfperobjs = [cumperfperobjs; (cumsum(mean(so==repmat(tgts',1,6))))];
 	cumperfperobjm = [cumperfperobjm; (cumsum(mean(mo==repmat(tgts',1,6))))];
-	cumperfperobjr = [cumperfperobjr; (cumsum(mean(ro==repmat(tgts',1,6))))];
-	cumperfperobjsal = [cumperfperobjsal; (cumsum(mean(salo==repmat(tgts',1,6))))];
+%	cumperfperobjr = [cumperfperobjr; (cumsum(mean(ro==repmat(tgts',1,6))))];
+%	cumperfperobjsal = [cumperfperobjsal; (cumsum(mean(salo==repmat(tgts',1,6))))];
 end
 
 figure; 
 set(0, 'DefaultAxesFontSize', 18, 'DefaultAxesFontWeight', 'Bold'); 
 errorbar(1:6,mean(cumperfperobjs),std(cumperfperobjs)/sqrt(NBOBJS), 'ko-'); hold on; 
 errorbar(1:6,mean(cumperfperobjm),std(cumperfperobjm)/sqrt(NBOBJS), 'k*-'); hold on; 
-errorbar(1:6,mean(cumperfperobjr),std(cumperfperobjr)/sqrt(NBOBJS), 'k*--'); hold on; 
-errorbar(1:6,mean(cumperfperobjsal),std(cumperfperobjsal)/sqrt(NBOBJS), 'ko--'); hold on; 
+%errorbar(1:6,mean(cumperfperobjr),std(cumperfperobjr)/sqrt(NBOBJS), 'k*--'); hold on; 
+%errorbar(1:6,mean(cumperfperobjsal),std(cumperfperobjsal)/sqrt(NBOBJS), 'ko--'); hold on; 
 %plot(cumsum(mean(ro==repmat(tgts',1,6))), 'ko--');plot(cumsum(mean(salo==repmat(tgts',1,6))), 'ko:');
-legend('Subject', 'Model', 'Randomized', 'Saliency model', 'location', 'SouthEast'); title('Cumulative performance after each fixation');
+%legend('Subject', 'Model', 'Randomized', 'Saliency model', 'location', 'SouthEast'); title('Cumulative performance after each fixation');
+legend('Subject', 'Model'); title('Cumulative performance after each fixation');
 axis([.9 6.1 0 1.1]);
 %%print('-dpng', '-r300', 'cumperf.png');
 %print('-depsc', '-r300', 'cumperf.eps');

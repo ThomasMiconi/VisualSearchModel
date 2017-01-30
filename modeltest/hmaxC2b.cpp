@@ -2,6 +2,15 @@
 #include "time.h"
 #include "string.h"
 
+// This code, together with utils.h, implements the HMAX model (most of the actual code is in utils.h).
+
+// Be warned that this code is absolutely ugly and is only made public for archival purposes. Browse at your own peril.
+
+// Importantly, the code does *not* perform convolutions. Rather, all connections are individually built and stored in memorybefore applying computations. This choice was made to support future directions that did not materialize. 
+
+// If you absolutely want to look into HMAX, you are much better off looking at the Python code on my webpage, http://scholar.harvard.edu/files/tmiconi/files/hmax-python_1.zip
+// However, note that there is no real reason to use actual HMAX code now rather than a Deep Learning framework like Keras.
+
 
 
 
